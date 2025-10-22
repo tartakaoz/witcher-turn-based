@@ -4,16 +4,16 @@ from battle import battle
 from utils import pause, line
 
 # Create the player
-player = Player("Geralt", 110, 25)
+player = Player("Geralt", 110, 25, 100)
 
 # Create a list of enemies
 enemies = [
-    Enemy("Drowner", 70, 10),
-    Enemy("Imlerith", 110, 20),
-    Enemy("Eredin", 130, 25)
+    Enemy("Drowner", 70, 10, 60),
+    Enemy("Imlerith", 110, 20, 120),
+    Enemy("Eredin", 130, 25, 140)
 ]
 
-print("\n" * 5)
+print("\n" * 100)
 print("⚔️  The Witcher Adventure Begins! ⚔️\n")
 pause()
 

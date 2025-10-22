@@ -6,8 +6,10 @@ def battle(player, enemy):
     pause()
 
     while player.is_alive() and enemy.is_alive():
+        print("\n" * 100)
         line()
         print(f"{player.name} HP: {player.health} | {enemy.name} HP: {enemy.health}")
+        print(f"Energy: {player.energy}    | Energy: {enemy.energy}")
         print("Choose your action:")
         print("1. Attack")
         print("2. Dodge")
@@ -16,11 +18,21 @@ def battle(player, enemy):
         choice = input("> ")
 
         if choice == "1":
+            if random.random() < 0.3:
+                enemy.dodge()
+
             player.attack(enemy)
+
+            if enemy.enemy_dodge:
+                enemy.enemy_dodge = False
+                continue
+
         elif choice == "2":
             player.dodge()
+
         elif choice == "3":
             player.counter_attack()
+
         else:
             print("Invalid choice — you lose your turn.")
         
@@ -44,12 +56,9 @@ def battle(player, enemy):
             enemy.health -= player.counter_damage
             player.counter_attack_next = False
         else:
-            if random.random() < 0.8:
-                enemy.attack(player)
-            else:
-                heal = random.randint(15, 30)
-                enemy.health += heal
-                print(f"{enemy.name} heals for {heal} HP!")
+            enemy.attack(player)
+           
+
 
         pause()
 
