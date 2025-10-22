@@ -1,7 +1,7 @@
 from utils import pause, line
 import random
-
 def battle(player, enemy):
+    input("Press enter to continue to the battle")
     print(f"\n⚔️ {enemy.name} appears!\n")
     pause()
 
@@ -18,8 +18,8 @@ def battle(player, enemy):
         choice = input("> ")
 
         if choice == "1":
-            if random.random() < 0.3:
-                enemy.dodge()
+            if random.random() < 0.2:
+                enemy.dodge(player)
 
             player.attack(enemy)
 
@@ -28,7 +28,16 @@ def battle(player, enemy):
                 continue
 
         elif choice == "2":
-            player.dodge()
+            player.dodge(enemy)
+
+            player.attack_power = 0
+            if random.random() < 0.2:
+              enemy.dodge(player)
+              enemy.enemy_dodge = False
+              player.attack_power = 25
+              continue
+            player.attack_power = 25
+
 
         elif choice == "3":
             player.counter_attack()
@@ -55,11 +64,14 @@ def battle(player, enemy):
             print(f"{player.name} counter attacks {enemy.name} for {player.counter_damage} damage! ⚡️")
             enemy.health -= player.counter_damage
             player.counter_attack_next = False
+            if not enemy.is_alive():
+                print(f"{enemy.name} is defeated by your counter attack! 🎉")
+                player.gain_exp(50)
+                pause()
+                break
         else:
             enemy.attack(player)
            
-
-
         pause()
 
         if not player.is_alive():

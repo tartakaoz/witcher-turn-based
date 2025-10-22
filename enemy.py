@@ -1,4 +1,5 @@
 from character import Character
+from utils import pause
 import random
 
 class Enemy(Character):
@@ -24,6 +25,8 @@ class Enemy(Character):
             print(f"{self.name} activates a special power! 👹")
             self.special_power = True
 
-    def dodge(self):
-        self.energy += 45
+    def dodge(self, target):
+        if target.attack_power > 0:
+           self.energy += 45
         self.enemy_dodge = True
+
