@@ -12,7 +12,7 @@ class Player(Character):
 
 
     def dodge(self):
-        if random.random() < 0.5:
+        if random.random() < 0.99:
             print("🥷 You prepare to dodge the next attack!")
             self.dodge_next = True
         else:

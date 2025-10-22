@@ -2,7 +2,7 @@ from utils import pause, line
 import random
 
 def battle(player, enemy):
-    print(f"\n⚔️  A wild {enemy.name} appears!\n")
+    print(f"\n⚔️ {enemy.name} appears!\n")
     pause()
 
     while player.is_alive() and enemy.is_alive():
@@ -12,7 +12,6 @@ def battle(player, enemy):
         print("1. Attack")
         print("2. Dodge")
         print("3. Counter Attack")
-        print("4. Quit Battle")
 
         choice = input("> ")
 
@@ -22,9 +21,6 @@ def battle(player, enemy):
             player.dodge()
         elif choice == "3":
             player.counter_attack()
-        elif choice == "4":
-            print("👋 You fled the battle!")
-            break
         else:
             print("Invalid choice — you lose your turn.")
         

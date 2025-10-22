@@ -9,8 +9,8 @@ player = Player("Geralt", 110, 25)
 # Create a list of enemies
 enemies = [
     Enemy("Drowner", 70, 10),
-    Enemy("Eredin", 120, 20),
-    Enemy("Wild Hunt Captain", 100, 25)
+    Enemy("Imlerith", 110, 20),
+    Enemy("Eredin", 130, 25)
 ]
 
 print("\n" * 5)
