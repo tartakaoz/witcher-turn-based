@@ -1,6 +1,6 @@
 import time
 
-def pause(seconds=1.5):
+def pause(seconds=2):
     """Pause the game for dramatic effect."""
     time.sleep(seconds)
 

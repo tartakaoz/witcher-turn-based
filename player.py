@@ -1,5 +1,4 @@
 from character import Character
-from utils import pause
 import random
 
 class Player(Character):
@@ -7,53 +6,51 @@ class Player(Character):
         super().__init__(name, health, attack_power, energy)
         self.level = 1
         self.exp = 0
-        self.dodge_next = False
-        self.counter_attack_next = False
-        self.counter_damage = 0
 
-    def attack(self, target):
-      if self.energy>15:
-        self.energy -= 20
-        critic = random.random() / 2
-        damage = round(self.attack_power * (critic + 1))
-        if hasattr(target, "enemy_dodge") and target.enemy_dodge:
-            print(f"{target.name} dodged your attack!")
-            pause()
-            return
-        target.health -= damage
-        print(f"{self.name} attacks {target.name} for {damage} damage!")
-      else:
-         print("Not enough energy")
-         print("Try again!")
-         pause()
+    # -------------------------------
+    # ACTIONS (return intent objects)
+    # -------------------------------
+    def choose_attack(self):
+        if self.energy < 15:
+            print("Not enough energy to attack!")
+            return {"type": "none"}
 
+        self.energy -= 15
+        damage = self.roll_damage()
+        print(f"{self.name} prepares to strike for {damage} damage!")
+        return {"type": "attack", "power": damage}
 
-    def dodge(self, target):
-        if random.random() < 0.8:
-            print("🥷 You prepare to dodge the next attack!")
-            if hasattr(target, "enemy_dodge") and target.enemy_dodge:
-              print(f"{target.name} dodged your attack!")
-              self.dodge_next = False
-              pause()
-              return
-            if target.attack_power > 0:
-              self.dodge_next = True
-              self.energy += 45
-        else:
-            print("❌ Failed to dodge.")
-            self.dodge_next = False
+    def choose_dodge(self):
+        print("🥷 You prepare to dodge the next attack!")
+        return {"type": "dodge"}
     
-    def counter_attack(self):
-        if random.random() < 0.85:
-            print("😈 You prepare to counter the next attack!")
-            self.energy -= 25
-            criticR = random.random() / 2
-            self.counter_damage = round(self.attack_power * (criticR + 1))
-            self.counter_attack_next = True
-        else:
-            print("❌ You failed to ready your counter.")
-            self.counter_attack_next = False
+    def choose_counter(self):
+      if self.energy < 25:
+        print("Not enough energy to prepare a counterattack!")
+        return {"type": "none"}
+      
+      self.energy -= 25
+      print("😈 You prepare to counter the next attack!")
+      counter_damage = self.roll_damage()
+      return {"type": "counter", "power": counter_damage}
 
+
+    def choose_heal(self):
+        if self.energy < 20:
+            print("Not enough energy to heal!")
+            return {"type": "none"}
+
+        self.energy -= 20
+        heal_amount = random.randint(25, 40)
+        print(f"{self.name} prepares to heal for {heal_amount} HP.")
+        return {"type": "heal", "amount": heal_amount}
+
+    # -------------------------------
+    # SUPPORT FUNCTIONS
+    # -------------------------------
+    def roll_damage(self):
+        critic = random.random() / 2
+        return round(self.attack_power * (1 + critic))
 
     def gain_exp(self, amount):
         self.exp += amount
