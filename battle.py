@@ -1,4 +1,5 @@
 from utils import pause, line
+from character import Character
 import random
 
 def battle(player, enemy):
@@ -54,7 +55,7 @@ def battle(player, enemy):
         if not enemy.is_alive():
             print(f"🏆 {enemy.name} is defeated!")
             player.gain_exp(50)
-            player.health = min(player.health, 110)  # Geralt’s base max HP
+            player.clamp_stats()  # Geralt’s base max HP
             break
 
         if not player.is_alive():
@@ -83,12 +84,12 @@ def resolve_turn(player, enemy, p_action, e_action):
         print(f"💥 Both {player.name} and {enemy.name} trade blows!")
     elif pa == "attack" and ea == "dodge":
         energy_gain = random.randint(25, 45)
-        enemy.energy = min(100, enemy.energy + energy_gain)
+        enemy.energy = min(enemy.max_energy, enemy.energy + energy_gain)
         print(f"{enemy.name} dodges and regains {energy_gain} energy! ⚡️")
         # --- PLAYER didn't attack, but ENEMY dodged nothing ---
     elif ea == "dodge" and pa != "attack":
        energy_gain = random.randint(20, 30)
-       enemy.energy = min(100, enemy.energy + energy_gain)
+       enemy.energy = min(enemy.max_energy, enemy.energy + energy_gain)
        print(f"{enemy.name} dodges nothing but regains {energy_gain} energy. 💨")
     elif pa == "attack" and ea == "heal":
         enemy.health += e_action["amount"]
@@ -98,11 +99,11 @@ def resolve_turn(player, enemy, p_action, e_action):
     # --- DODGE vs ATTACK / HEAL ---
     elif pa == "dodge" and ea == "attack":
         energy_gain = random.randint(25, 45)
-        player.energy = min(100, player.energy + energy_gain)
+        player.energy = min(player.max_energy, player.energy + energy_gain)
         print(f"{player.name} gains {energy_gain} energy from dodging! ⚡️")
     elif pa == "dodge" and ea == "heal":
         energy_gain = random.randint(20, 30)
-        player.energy = min(100, player.energy + energy_gain)
+        player.energy = min(player.max_energy, player.energy + energy_gain)
         print(f"{player.name} gains {energy_gain} energy from dodging nothing! ⚡️")
 
     # --- HEAL cases ---
@@ -131,5 +132,6 @@ def resolve_turn(player, enemy, p_action, e_action):
         print("Both fighters hesitate, watching each other closely...")
 
     # Clamp health so it doesn’t go negative
-    player.health = max(0, player.health)
-    enemy.health = max(0, enemy.health)
+    player.clamp_stats()
+    enemy.clamp_stats()
+

@@ -60,7 +60,9 @@ class Player(Character):
 
     def level_up(self):
         self.level += 1
-        self.health += 20
+        self.health = min(self.health + 25, self.max_health)
+        self.max_energy += 10
+        self.max_health += 20
         self.attack_power += 5
         self.exp = 0
         print(f"🎉 {self.name} leveled up to Level {self.level}!")
