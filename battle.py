@@ -42,11 +42,11 @@ def battle(player, enemy):
         # -------------------------------
         enemy_action = enemy.choose_action()
 
-        pause()
+
         pause()
         resolve_turn(player, enemy, player_action, enemy_action)
         pause()
-        pause()
+
 
         # -------------------------------
         # CHECK END CONDITIONS
