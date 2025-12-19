@@ -31,7 +31,7 @@ class Player(Character):
       
       self.energy -= 25
       print("😈 You prepare to counter the next attack!")
-      counter_damage = self.roll_damage()
+      counter_damage = self.attack_power
       return {"type": "counter", "power": counter_damage}
 
 
@@ -41,16 +41,14 @@ class Player(Character):
             return {"type": "none"}
 
         self.energy -= 20
-        heal_amount = random.randint(25, 40)
+        heal_amount = 20
         print(f"{self.name} prepares to heal for {heal_amount} HP.")
         return {"type": "heal", "amount": heal_amount}
 
     # -------------------------------
     # SUPPORT FUNCTIONS
     # -------------------------------
-    def roll_damage(self):
-        critic = random.random() / 2
-        return round(self.attack_power * (1 + critic))
+
 
     def gain_exp(self, amount):
         self.exp += amount

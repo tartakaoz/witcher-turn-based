@@ -8,12 +8,13 @@ player = Player("Geralt", 110, 25, 100)
 
 # Create a list of enemies
 enemies = [
-    Enemy("Drowner", 70, 10, 60),
-    Enemy("Imlerith", 110, 20, 120),
-    Enemy("Eredin", 130, 25, 140)
+    Enemy("Drowner", 70, 10, 60, max_focus=2),
+    Enemy("Imlerith", 110, 20, 120, max_focus=3),
+    Enemy("Eredin", 130, 25, 140, max_focus=4)
 ]
 
-print("\n" * 100)
+line()
+line()
 print("⚔️  The Witcher Adventure Begins! ⚔️\n")
 pause()
 

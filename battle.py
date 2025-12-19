@@ -83,12 +83,12 @@ def resolve_turn(player, enemy, p_action, e_action):
         player.health -= e_action["power"]
         print(f"💥 Both {player.name} and {enemy.name} trade blows!")
     elif pa == "attack" and ea == "dodge":
-        energy_gain = random.randint(25, 45)
+        energy_gain = 30
         enemy.energy = min(enemy.max_energy, enemy.energy + energy_gain)
         print(f"{enemy.name} dodges and regains {energy_gain} energy! ⚡️")
         # --- PLAYER didn't attack, but ENEMY dodged nothing ---
     elif ea == "dodge" and pa != "attack":
-       energy_gain = random.randint(20, 30)
+       energy_gain = 15
        enemy.energy = min(enemy.max_energy, enemy.energy + energy_gain)
        print(f"{enemy.name} dodges nothing but regains {energy_gain} energy. 💨")
     elif pa == "attack" and ea == "heal":
@@ -98,11 +98,11 @@ def resolve_turn(player, enemy, p_action, e_action):
 
     # --- DODGE vs ATTACK / HEAL ---
     elif pa == "dodge" and ea == "attack":
-        energy_gain = random.randint(25, 45)
+        energy_gain = 30
         player.energy = min(player.max_energy, player.energy + energy_gain)
         print(f"{player.name} gains {energy_gain} energy from dodging! ⚡️")
     elif pa == "dodge" and ea == "heal":
-        energy_gain = random.randint(20, 30)
+        energy_gain = 15
         player.energy = min(player.max_energy, player.energy + energy_gain)
         print(f"{player.name} gains {energy_gain} energy from dodging nothing! ⚡️")
 

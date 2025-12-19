@@ -2,9 +2,10 @@ from character import Character
 import random
 
 class Enemy(Character):
-    def __init__(self, name, health, attack_power, energy):
+    def __init__(self, name, health, attack_power, energy, max_focus):
         super().__init__(name, health, attack_power, energy)
-        self.special_power = False
+        self.focus = 0
+        self.max_focus = max_focus
 
     # -------------------------------
     # DECIDE ACTION EACH TURN
@@ -12,19 +13,16 @@ class Enemy(Character):
     def choose_action(self):
         roll = random.random()
 
-        if self.energy < 10:
+        if self.energy < 15:
             return self.rest()  # regain some energy instead
 
-        if roll < 0.6:
-            return self.choose_attack()
-        elif roll < 0.8:
+        if self.health <= self.max_health * 0.35:
             return self.choose_heal()
-        else:
-            return self.choose_dodge()
+        return self.choose_attack()
 
     def choose_attack(self):
         self.energy -= 15
-        damage = self.roll_damage()
+        damage = self.attack_power
         print(f"{self.name} winds up to attack for {damage} damage!")
         return {"type": "attack", "power": damage}
 
@@ -33,12 +31,12 @@ class Enemy(Character):
         return {"type": "dodge"}
 
     def choose_heal(self):
-        heal_amount = random.randint(20, 35)
+        heal_amount = 20
         print(f"{self.name} prepares to heal for {heal_amount} HP.")
         return {"type": "heal", "amount": heal_amount}
 
     def rest(self):
-        regain = random.randint(10, 25)
+        regain = 20
         self.energy += regain
         print(f"{self.name} is too tired and regains {regain} energy.")
         return {"type": "rest", "amount": regain}
@@ -46,6 +44,4 @@ class Enemy(Character):
     # -------------------------------
     # SUPPORT FUNCTION
     # -------------------------------
-    def roll_damage(self):
-        critic = random.random() / 2
-        return round(self.attack_power * (1 + critic))
+   
