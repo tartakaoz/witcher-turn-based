@@ -16,7 +16,7 @@ class Player(Character):
             return {"type": "none"}
 
         self.energy -= 15
-        damage = self.roll_damage()
+        damage = self.attack_power
         print(f"{self.name} prepares to strike for {damage} damage!")
         return {"type": "attack", "power": damage}
 

@@ -76,9 +76,22 @@ def resolve_turn(player, enemy, p_action, e_action):
     """Determines what happens based on both sides' actions."""
     pa = p_action["type"]
     ea = e_action["type"]
+    
+    enemy_attack = (ea == "attack" or ea == "heavy_attack")
+    
+        # --- ATTACK vs REST / NONE ---
+    if pa == "attack" and ea == "rest":
+        enemy.health -= p_action["power"]
+        print(f"{player.name} punishes the rest and hits {enemy.name} for {p_action['power']} damage!")
+        print(f"{enemy.name} catches their breath, regaining {e_action['amount']} energy.")
+
+    elif pa == "attack" and ea == "none":
+        enemy.health -= p_action["power"]
+        print(f"{player.name} lands a clean hit for {p_action['power']} damage!")
+
 
     # --- ATTACK vs DODGE / ATTACK ---
-    if pa == "attack" and ea == "attack":
+    elif pa == "attack" and enemy_attack:
         enemy.health -= p_action["power"]
         player.health -= e_action["power"]
         print(f"💥 Both {player.name} and {enemy.name} trade blows!")
@@ -97,7 +110,7 @@ def resolve_turn(player, enemy, p_action, e_action):
         print(f"{player.name} strikes while {enemy.name} heals!")
 
     # --- DODGE vs ATTACK / HEAL ---
-    elif pa == "dodge" and ea == "attack":
+    elif pa == "dodge" and enemy_attack:
         energy_gain = 30
         player.energy = min(player.max_energy, player.energy + energy_gain)
         print(f"{player.name} gains {energy_gain} energy from dodging! ⚡️")
@@ -107,7 +120,7 @@ def resolve_turn(player, enemy, p_action, e_action):
         print(f"{player.name} gains {energy_gain} energy from dodging nothing! ⚡️")
 
     # --- HEAL cases ---
-    elif pa == "heal" and ea == "attack":
+    elif pa == "heal" and enemy_attack:
         player.health += p_action["amount"]
         player.health -= e_action["power"]
         print(f"{player.name} heals but is hit by {enemy.name}!")
@@ -117,10 +130,10 @@ def resolve_turn(player, enemy, p_action, e_action):
         print(f"Both sides heal up for a breather 🧘")
 
     # --- COUNTERATTACK logic ---
-    elif pa == "counter" and ea == "attack":
+    elif pa == "counter" and enemy_attack:
         enemy.health -= p_action["power"]
         print(f"⚡ {player.name} counters {enemy.name}'s attack for {p_action['power']} damage!")
-    elif pa == "counter" and ea != "attack":
+    elif pa == "counter" and not enemy_attack:
         print(f"{player.name}'s counter stance fades — no attack to respond to.")
 
     # --- REST (enemy only) ---
