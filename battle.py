@@ -1,6 +1,5 @@
-from utils import pause, line
+from utils import pause, line, enter
 from character import Character
-import random
 
 def battle(player, enemy):
     print(f"\n⚔️  {enemy.name} appears!\n")
@@ -8,7 +7,7 @@ def battle(player, enemy):
 
     turn = 1
     while player.is_alive() and enemy.is_alive():
-        print("\n" * 50)
+        enter()
         line()
         print(f"Turn {turn}")
         print(f"{player.name} — HP: {player.health} | Energy: {player.energy}")
@@ -44,9 +43,10 @@ def battle(player, enemy):
         enemy_action = enemy.choose_action()
 
 
-        pause()
+        
         resolve_turn(player, enemy, player_action, enemy_action)
-        pause()
+        input("Press enter to continue")
+
 
 
         # -------------------------------
@@ -73,78 +73,120 @@ def battle(player, enemy):
 # ----------------------------------------------------------------------
 
 def resolve_turn(player, enemy, p_action, e_action):
-    """Determines what happens based on both sides' actions."""
-    pa = p_action["type"]
-    ea = e_action["type"]
-    
-    enemy_attack = (ea == "attack" or ea == "heavy_attack")
-    
-        # --- ATTACK vs REST / NONE ---
-    if pa == "attack" and ea == "rest":
-        enemy.health -= p_action["power"]
-        print(f"{player.name} punishes the rest and hits {enemy.name} for {p_action['power']} damage!")
-        print(f"{enemy.name} catches their breath, regaining {e_action['amount']} energy.")
-
-    elif pa == "attack" and ea == "none":
-        enemy.health -= p_action["power"]
-        print(f"{player.name} lands a clean hit for {p_action['power']} damage!")
+    pa = p_action.get("type", "none")
+    ea = e_action.get("type", "none")
 
 
-    # --- ATTACK vs DODGE / ATTACK ---
-    elif pa == "attack" and enemy_attack:
-        enemy.health -= p_action["power"]
-        player.health -= e_action["power"]
-        print(f"💥 Both {player.name} and {enemy.name} trade blows!")
-    elif pa == "attack" and ea == "dodge":
-        energy_gain = 30
-        enemy.energy = min(enemy.max_energy, enemy.energy + energy_gain)
-        print(f"{enemy.name} dodges and regains {energy_gain} energy! ⚡️")
-        # --- PLAYER didn't attack, but ENEMY dodged nothing ---
-    elif ea == "dodge" and pa != "attack":
-       energy_gain = 15
-       enemy.energy = min(enemy.max_energy, enemy.energy + energy_gain)
-       print(f"{enemy.name} dodges nothing but regains {energy_gain} energy. 💨")
-    elif pa == "attack" and ea == "heal":
-        enemy.health += e_action["amount"]
-        enemy.health -= p_action["power"]
-        print(f"{player.name} strikes while {enemy.name} heals!")
 
-    # --- DODGE vs ATTACK / HEAL ---
-    elif pa == "dodge" and enemy_attack:
-        energy_gain = 30
-        player.energy = min(player.max_energy, player.energy + energy_gain)
-        print(f"{player.name} gains {energy_gain} energy from dodging! ⚡️")
-    elif pa == "dodge" and ea == "heal":
-        energy_gain = 15
-        player.energy = min(player.max_energy, player.energy + energy_gain)
-        print(f"{player.name} gains {energy_gain} energy from dodging nothing! ⚡️")
+    # 2) Apply energy costs (ONLY here)
+    player.energy -= p_action.get("energy_cost", 0)
+    enemy.energy  -= e_action.get("energy_cost", 0)
 
-    # --- HEAL cases ---
-    elif pa == "heal" and enemy_attack:
-        player.health += p_action["amount"]
-        player.health -= e_action["power"]
-        print(f"{player.name} heals but is hit by {enemy.name}!")
-    elif pa == "heal" and ea == "heal":
-        player.health += p_action["amount"]
-        enemy.health += e_action["amount"]
-        print(f"Both sides heal up for a breather 🧘")
+    # Safety clamp: don’t go negative energy
+    player.energy = max(0, player.energy)
+    enemy.energy = max(0, enemy.energy)
 
-    # --- COUNTERATTACK logic ---
-    elif pa == "counter" and enemy_attack:
-        enemy.health -= p_action["power"]
-        print(f"⚡ {player.name} counters {enemy.name}'s attack for {p_action['power']} damage!")
-    elif pa == "counter" and not enemy_attack:
-        print(f"{player.name}'s counter stance fades — no attack to respond to.")
+    # Helper flags
+    enemy_attack = ea in ("attack", "heavy_attack")
+    player_attack = pa in ("attack", "heavy_attack")
 
-    # --- REST (enemy only) ---
-    elif ea == "rest":
-        print(f"{enemy.name} catches their breath, regaining {e_action['amount']} energy.")
+    # 3) Resolve interactions
 
-    # --- Default case ---
-    else:
-        print("Both fighters hesitate, watching each other closely...")
+    # --- Counter rules ---
+    if pa == "counter":
+        if enemy_attack:
+            # counter succeeds: enemy takes counter dmg, player avoids the hit (your design choice)
+            enemy.health -= p_action.get("power", 0)
+            print(f"⚡ {player.name} counters and hits {enemy.name} for {p_action.get('power', 0)} damage!")
+        else:
+            print(f"{player.name}'s counter stance fades — no attack to respond to.")
+        # enemy action still “happened” but counter handled it
+        player.clamp_stats()
+        enemy.clamp_stats()
+        return
 
-    # Clamp health so it doesn’t go negative
+    # --- Dodge rules ---
+    if pa == "dodge":
+        if enemy_attack:
+            # dodge avoids damage, gains energy
+            gain = 30
+            player.energy = min(player.max_energy, player.energy + gain)
+            print(f"{player.name} dodges and regains {gain} energy! ⚡️")
+        elif ea == "heal":
+            gain = 15
+            player.energy = min(player.max_energy, player.energy + gain)
+            print(f"{player.name} dodges nothing but regains {gain} energy. 💨")
+            enemy.health += e_action.get("amount", 0)
+            print(f"{enemy.name} heals for {e_action.get('amount', 0)} HP. 🧪")
+        elif ea == "rest":
+            enemy.energy = min(enemy.max_energy, enemy.energy + e_action.get("amount", 0))
+            print(f"{enemy.name} rests and regains {e_action.get('amount', 0)} energy.")
+        else:
+            print("Both fighters hesitate, watching each other closely...")
+
+        player.clamp_stats()
+        enemy.clamp_stats()
+        return
+
+    # --- Heal rules ---
+    if pa == "heal":
+        player.health += p_action.get("amount", 0)
+        print(f"{player.name} heals for {p_action.get('amount', 0)} HP. 🧪")
+
+        if enemy_attack:
+            player.health -= e_action.get("power", 0)
+            print(f"{enemy.name} hits {player.name} for {e_action.get('power', 0)} damage! 💥")
+        elif ea == "heal":
+            enemy.health += e_action.get("amount", 0)
+            print(f"{enemy.name} heals for {e_action.get('amount', 0)} HP. 🧪")
+        elif ea == "rest":
+            enemy.energy = min(enemy.max_energy, enemy.energy + e_action.get("amount", 0))
+            print(f"{enemy.name} rests and regains {e_action.get('amount', 0)} energy.")
+        else:
+            print(f"{enemy.name} does nothing.")
+
+        player.clamp_stats()
+        enemy.clamp_stats()
+        return
+
+    # --- Attack rules ---
+    if player_attack:
+        # Player attacks first (your choice). If you want simultaneous, move damage before checks.
+        if ea == "dodge":
+            gain = 30
+            enemy.energy = min(enemy.max_energy, enemy.energy + gain)
+            print(f"{enemy.name} dodges and regains {gain} energy! ⚡️")
+        else:
+            enemy.health -= p_action.get("power", 0)
+            print(f"{player.name} hits {enemy.name} for {p_action.get('power', 0)} damage! 💥")
+
+        # Enemy response
+        if enemy.is_alive():  # important: dead enemies shouldn’t hit back
+            if enemy_attack:
+                player.health -= e_action.get("power", 0)
+                print(f"{enemy.name} hits {player.name} for {e_action.get('power', 0)} damage! 💥")
+            elif ea == "heal":
+                enemy.health += e_action.get("amount", 0)
+                print(f"{enemy.name} heals for {e_action.get('amount', 0)} HP. 🧪")
+            elif ea == "rest":
+                enemy.energy = min(enemy.max_energy, enemy.energy + e_action.get("amount", 0))
+                print(f"{enemy.name} rests and regains {e_action.get('amount', 0)} energy.")
+            else:
+                print(f"{enemy.name} does nothing.")
+
+        player.clamp_stats()
+        enemy.clamp_stats()
+        return
+
+    # --- Rest (enemy only) ---
+    if ea == "rest":
+        enemy.energy = min(enemy.max_energy, enemy.energy + e_action.get("amount", 0))
+        print(f"{enemy.name} catches their breath, regaining {e_action.get('amount', 0)} energy.")
+        player.clamp_stats()
+        enemy.clamp_stats()
+        return
+
+    # Default
+    print("Both fighters hesitate, watching each other closely...")
     player.clamp_stats()
     enemy.clamp_stats()
-

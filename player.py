@@ -1,5 +1,4 @@
 from character import Character
-import random
 
 class Player(Character):
     def __init__(self, name, health, attack_power, energy):
@@ -8,59 +7,57 @@ class Player(Character):
         self.exp = 0
 
     # -------------------------------
-    # ACTIONS (return intent objects)
+    # ACTIONS (silent: return intent objects only)
     # -------------------------------
     def choose_attack(self):
-        if self.energy < 15:
-            print("Not enough energy to attack!")
-            return {"type": "none"}
+        cost = 15
+        if self.energy < cost:
+            return {"type": "none", "reason": "not_enough_energy", "attempted": "attack", "cost": cost}
 
-        self.energy -= 15
+        self.energy -= cost
         damage = self.attack_power
-        print(f"{self.name} prepares to strike for {damage} damage!")
-        return {"type": "attack", "power": damage}
+        return {"type": "attack", "power": damage, "cost": cost}
 
     def choose_dodge(self):
-        print("🥷 You prepare to dodge the next attack!")
+        # no energy cost, just an intent
         return {"type": "dodge"}
-    
-    def choose_counter(self):
-      if self.energy < 25:
-        print("Not enough energy to prepare a counterattack!")
-        return {"type": "none"}
-      
-      self.energy -= 25
-      print("😈 You prepare to counter the next attack!")
-      counter_damage = self.attack_power
-      return {"type": "counter", "power": counter_damage}
 
+    def choose_counter(self):
+        cost = 25
+        if self.energy < cost:
+            return {"type": "none", "reason": "not_enough_energy", "attempted": "counter", "cost": cost}
+
+        self.energy -= cost
+        counter_damage = self.attack_power
+        return {"type": "counter", "power": counter_damage, "cost": cost}
 
     def choose_heal(self):
-        if self.energy < 20:
-            print("Not enough energy to heal!")
-            return {"type": "none"}
+        cost = 20
+        if self.energy < cost:
+            return {"type": "none", "reason": "not_enough_energy", "attempted": "heal", "cost": cost}
 
-        self.energy -= 20
+        self.energy -= cost
         heal_amount = 20
-        print(f"{self.name} prepares to heal for {heal_amount} HP.")
-        return {"type": "heal", "amount": heal_amount}
+        return {"type": "heal", "amount": heal_amount, "cost": cost}
 
     # -------------------------------
     # SUPPORT FUNCTIONS
     # -------------------------------
-
-
     def gain_exp(self, amount):
         self.exp += amount
-        print(f"{self.name} gained {amount} XP!")
-        if self.exp >= self.level * 50:
+        # silent: let battle/resolve_turn print this if you want
+        # return info so caller can decide whether to print
+        leveled = False
+        while self.exp >= self.level * 50:
+            self.exp -= self.level * 50
             self.level_up()
+            leveled = True
+        return {"gained": amount, "leveled_up": leveled, "level": self.level}
 
     def level_up(self):
         self.level += 1
-        self.health = min(self.health + 25, self.max_health)
-        self.max_energy += 10
         self.max_health += 20
+        self.max_energy += 10
         self.attack_power += 5
-        self.exp = 0
-        print(f"🎉 {self.name} leveled up to Level {self.level}!")
+        # optional: heal a bit on level up (your old code did a partial heal)
+        self.health = min(self.health + 25, self.max_health)

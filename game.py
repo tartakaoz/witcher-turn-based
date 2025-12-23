@@ -1,7 +1,7 @@
 from player import Player
 from enemy import Enemy
 from battle import battle
-from utils import pause, line
+from utils import pause, line, enter
 
 # Create the player
 player = Player("Geralt", 110, 25, 100)
@@ -15,8 +15,9 @@ enemies = [
 
 line()
 line()
+enter()
 print("⚔️  The Witcher Adventure Begins! ⚔️\n")
-pause()
+
 
 # Loop through each enemy
 for enemy in enemies:

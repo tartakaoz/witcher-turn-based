@@ -6,3 +6,6 @@ def pause(seconds=2):
 
 def line():
     print("-" * 40)
+    
+def enter():
+    print("\n" * 50)
