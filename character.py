@@ -15,3 +15,4 @@ class Character:
     def clamp_stats(self):
         self.health = max(0, min(self.health, self.max_health))
         self.energy = max(0, min(self.energy, self.max_energy))
+        
