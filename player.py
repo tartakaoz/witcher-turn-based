@@ -12,11 +12,17 @@ class Player(Character):
     def choose_attack(self):
         cost = 15
         if self.energy < cost:
-            return {"type": "none", "reason": "not_enough_energy", "attempted": "attack", "cost": cost}
+            return {"type": "none", 
+                    "reason": "not_enough_energy", 
+                    "attempted": "attack", 
+                    "cost": cost}
 
         self.energy -= cost
         damage = self.attack_power
-        return {"type": "attack", "power": damage, "cost": cost}
+        return {"type": "attack", 
+                "power": damage, 
+                "cost": cost
+                }
 
     def choose_dodge(self):
         # no energy cost, just an intent
@@ -25,34 +31,44 @@ class Player(Character):
     def choose_counter(self):
         cost = 25
         if self.energy < cost:
-            return {"type": "none", "reason": "not_enough_energy", "attempted": "counter", "cost": cost}
+            return {"type": "none", 
+                    "reason": "not_enough_energy", 
+                    "attempted": "counter", 
+                    "cost": cost}
 
         self.energy -= cost
         counter_damage = self.attack_power
-        return {"type": "counter", "power": counter_damage, "cost": cost}
+        return {"type": "counter", 
+                "power": counter_damage, 
+                "cost": cost}
 
     def choose_heal(self):
         cost = 20
         if self.energy < cost:
-            return {"type": "none", "reason": "not_enough_energy", "attempted": "heal", "cost": cost}
+            return {"type": "none", 
+                    "reason": "not_enough_energy", 
+                    "attempted": "heal", 
+                    "cost": cost}
 
         self.energy -= cost
         heal_amount = 20
-        return {"type": "heal", "amount": heal_amount, "cost": cost}
+        return {"type": "heal", 
+                "amount": heal_amount, 
+                "cost": cost}
 
     # -------------------------------
     # SUPPORT FUNCTIONS
     # -------------------------------
     def gain_exp(self, amount):
         self.exp += amount
-        # silent: let battle/resolve_turn print this if you want
-        # return info so caller can decide whether to print
         leveled = False
         while self.exp >= self.level * 50:
             self.exp -= self.level * 50
             self.level_up()
             leveled = True
-        return {"gained": amount, "leveled_up": leveled, "level": self.level}
+        return {"gained": amount, 
+                "leveled_up": leveled, 
+                "level": self.level}
 
     def level_up(self):
         self.level += 1

@@ -4,6 +4,7 @@ from battle import battle
 from utils import pause, line, enter
 
 # Create the player
+# Test for terminal
 player = Player("Geralt", 110, 25, 100)
 
 # Create a list of enemies
